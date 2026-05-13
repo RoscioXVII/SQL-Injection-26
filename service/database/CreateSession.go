@@ -12,7 +12,6 @@ import (
 func (db *appdbimpl) CreateSession(username string, pw string) (string, string, time.Time, error) {
 	var userId int
 	var password string
-
 	// Controlla se l'utente esiste --- modificare qui + gestire pw sbagliata
 	query := `SELECT u.userId, u.password
               FROM User u
@@ -41,9 +40,8 @@ func (db *appdbimpl) CreateSession(username string, pw string) (string, string, 
 
 		// Inserisci il nuovo username
 		_, err = db.c.Exec(
-			"INSERT INTO UserUsername(userId, username, password) VALUES (?, ?, ?);",
-			newUserId, username, pw,
-		)
+			"INSERT INTO UserUsername(userId, username) VALUES (?, ?);",
+			newUserId, username)
 		if err != nil {
 			return "", "", time.Time{}, fmt.Errorf("failed to insert username: %w", err)
 		}
