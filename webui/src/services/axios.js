@@ -30,9 +30,14 @@ export const doLogin = async (username, password) => {
 			time: response.data.time
 		};
 	} catch (error) {
-		console.error("Login error:", error);
-		throw error;
-	}
+
+    console.error("Login error:", error);
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error("Errore durante il login");
+
+  }
 };
 
 

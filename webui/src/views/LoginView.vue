@@ -63,7 +63,7 @@ const login = async () => {
 
 
 
-      <div v-if="errorMessage" class="alert alert-danger" role="alert">{{ errorMessage }}</div>
+      <ErrorMsg v-if="errorMessage" :msg="errorMessage" />
 
       <button
         type="button"
