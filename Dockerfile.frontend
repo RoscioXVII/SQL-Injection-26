@@ -1,0 +1,34 @@
+FROM node:20-slim AS builder
+# usiamo Node.js per compilare il frontend (avendo usato Vue)
+
+WORKDIR /app
+# impostiamo la cartella di lavoro
+
+RUN corepack enable
+# utilizzato per lo yarn
+
+COPY webui/package.json webui/yarn.lock ./
+# copiamo i file delle dipendenze
+
+COPY webui/ .
+# copiamo tutto il codice sorgente
+
+RUN yarn install
+# installiamo le dipendenze
+
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+#aumentiamo la memoria
+
+RUN yarn vite build --mode production
+# buildiamo (ps. crea anche la cartella "dist" con i file ottimizzati)
+
+FROM nginx:alpine
+# ora, per il server web usiamo nginx che è leggero e servirà per ospitare il frontend
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+# copiamo i file compilati del builder nella cartella pubblica di Nginx
+
+EXPOSE 80
+
+CMD ["nginx","-g","daemon off;"]

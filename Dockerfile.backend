@@ -1,0 +1,50 @@
+FROM golang:1.23 AS builder
+# specifichiamo la versione di Go e lo impostiamo come builder
+
+WORKDIR /app
+# creiamo la cartella di lavoro
+
+COPY go.mod go.sum ./
+# copiamo il file delle dipendenze
+
+RUN go mod download
+# scarichiamo le dipendenze
+
+COPY . .
+# copiamo tutto il codice sorgente
+
+RUN CGO_ENABLED=1 GOOS=linux go build -o webapi ./cmd/webapi
+# runniamo per compilare, usiamo CGO_ENABLED perchè usaimo SQLite e -o per dare il nome all'eseguibile
+
+FROM debian:bookworm-slim
+# serve per creare l'immagine (usiamo Debian Slim perché è leggera, senza compilatori Go)
+
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+# installiamo i certificati di sicurezza (lo facciamo per sicurezza per eventuali chiamate HTTPS esterne che possono essere utili per meccanismi interni oppure per evetuali migliorie future)
+
+WORKDIR /app
+# definiamo la cartella di lavoro
+
+
+COPY --from=builder /app/webapi .
+# Copia il file "webapi" creato nello stage "builder" nella cartella corrente del nuovo container
+
+RUN mkdir -p /app/uploads
+# cartella che salva le immagini dei profili o dei gruppi
+
+RUN mkdir -p /app/assets/default
+# per l'immagine di default di gruppi e utenti
+
+COPY ./assets/default/default-avatar-profile-icon-social-600nw-1906669723.png /app/assets/default/
+#copio l'immagine di default nella cartella
+
+RUN chmod 777 /app/uploads
+# imposiamo i permessi per permettere la scrittura e lettura da tutti
+
+EXPOSE 3000
+# per la porta
+
+CMD ["./webapi"]
+
+
+
