@@ -38,6 +38,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
@@ -82,6 +83,12 @@ func run() error {
 
 	// Start Database
 	logger.Println("initializing database support")
+	if dbDir := filepath.Dir(cfg.DB.Filename); dbDir != "" && dbDir != "." {
+		if err := os.MkdirAll(dbDir, 0o755); err != nil {
+			logger.WithError(err).Error("error creating database directory")
+			return fmt.Errorf("creating database directory: %w", err)
+		}
+	}
 	dbconn, err := sql.Open("sqlite3", cfg.DB.Filename)
 	if err != nil {
 		logger.WithError(err).Error("error opening SQLite DB")

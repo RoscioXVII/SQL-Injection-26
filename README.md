@@ -97,6 +97,28 @@ yarn run build-prod
 
 For "Web and Software Architecture" students: before committing and pushing your work for grading, please read the section below named "My build works when I use `yarn run dev`, however there is a Javascript crash in production/grading"
 
+## Database persistence
+
+The backend uses SQLite. By default the database file is written to `./data/decaf.db` (relative to the process working directory). The `data/` directory is created automatically at startup if missing.
+
+### Local development
+
+When running with `go run ./cmd/webapi/` from the repository root, the database is stored at `<repo>/data/decaf.db` and persists across restarts.
+
+To override the path, use the `--db-filename` flag or the `CFG_DB_FILENAME` environment variable:
+
+```shell
+go run ./cmd/webapi/ --db-filename ./data/custom.db
+```
+
+### Docker
+
+Inside the container the working directory is `/app`, so the default path resolves to `/app/data/decaf.db`. To make the database survive container removal, mount a host directory (or a named volume) onto `/app/data`:
+
+```shell
+docker run -p 3000:3000 -v "$(pwd)/data:/app/data" <image>
+```
+
 ## Known issues
 
 ### My build works when I use `yarn run dev`, however there is a Javascript crash in production/grading
