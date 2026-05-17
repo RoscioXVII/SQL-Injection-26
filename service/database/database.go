@@ -41,6 +41,7 @@ type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
 	CreateSession(string, string) (string, string, time.Time, error)
+	CreateUser(string, string) (string, string, time.Time, error)
 	UserByToken(token string) (int, error)
 	Users() ([]DBUser, error)
 	GetUserById(userId int) ([]DBUser, error)

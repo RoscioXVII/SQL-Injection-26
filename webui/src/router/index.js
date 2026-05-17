@@ -1,6 +1,7 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
 import ChatView from '../views/ChatView.vue'
 
 import GroupView from "../views/GroupView.vue";
@@ -9,6 +10,7 @@ const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
 	routes: [
 		{path: '/', component: LoginView},
+		{path: '/register', component: RegisterView},
 		{path: '/home', component: HomeView},
 		{	path: '/conversation/:conversationId',
 			name: 'conversation',

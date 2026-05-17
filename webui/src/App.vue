@@ -8,7 +8,7 @@ export default {}
 </script>
 
 <template>
-  <header v-if="route.path !== '/'" class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+  <header v-if="route.path !== '/' && route.path !== '/register'" class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
     <RouterLink class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6" to="/home">
       WasaText
     </RouterLink>
@@ -25,7 +25,7 @@ export default {}
         <SidebarContent />
       </nav>
 
-      <main :class="['px-md-4', (route.path === '/' || route.path === '/home') ? 'col-12' : 'col-md-9 ms-sm-auto col-lg-10']">
+      <main :class="['px-md-4', (route.path === '/' || route.path === '/register' || route.path === '/home') ? 'col-12' : 'col-md-9 ms-sm-auto col-lg-10']">
         <RouterView />
       </main>
     </div>

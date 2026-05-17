@@ -41,6 +41,35 @@ export const doLogin = async (username, password) => {
 };
 
 
+/*
+doRegister sends a registration request to POST /register with the provided credentials.
+On success it returns the freshly created session payload so the caller can immediately
+authenticate the user without a separate login round trip; on failure it rethrows the
+backend error message when available, otherwise a generic registration error.
+*/
+export const doRegister = async (username, password) => {
+	try {
+		const response = await instance.post("/register", {
+			name: username,
+			password: password
+		});
+
+		return {
+			userId: response.data.userId,
+			token: response.data.token,
+			time: response.data.time
+		};
+	} catch (error) {
+
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
+    throw new Error("Errore durante la registrazione");
+
+  }
+};
+
+
 export const getConversations = async (userId) => {
 	try{
 		const response = await instance.get(`users/${userId}/conversations`);
