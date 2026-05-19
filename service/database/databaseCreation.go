@@ -1,9 +1,5 @@
 package database
 
-import (
-	"fmt"
-)
-
 const SQLschema = `
 	PRAGMA journal_mode=WAL;
 	PRAGMA busy_timeout = 5000;
@@ -261,11 +257,3 @@ BEGIN
 END;
 
 `
-
-func (db *appdbimpl) initSchema() error {
-	_, err := db.c.Exec(SQLschema)
-	if err != nil {
-		return fmt.Errorf("failed to create schema: %w", err)
-	}
-	return nil
-}
