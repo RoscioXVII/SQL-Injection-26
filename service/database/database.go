@@ -130,7 +130,11 @@ func (db *appdbimpl) initSchema() error {
 					(2, '$2a$12$HASHEDPASSWORD2_BOB_ABC'),
 					(3, 'forzaRoma2000!'),
 					(4, 'Mancini2x?#');
-
+				INSERT INTO UsPhoto(photoId, userId) VALUES
+				    (1,1),
+				    (1,2),
+				    (1,3),
+				    (2,4);
 				INSERT INTO UserUsername (userId, username) VALUES
 					(1, 'alice_dev'),
 					(2, 'bob_marley'),
@@ -139,6 +143,8 @@ func (db *appdbimpl) initSchema() error {
 
 				INSERT INTO Group_ (name, creator) VALUES
 					('Team Sviluppo Go', 1);
+				INSERT INTO GroupPhoto (photoId, groupId) VALUES
+				    (2,1);
 
 				INSERT INTO Components (groupId, userId) VALUES
 					(1, 1),
