@@ -8,14 +8,14 @@ const username = ref('');
 const password = ref('');
 const errorMessage = ref(null);
 
-const login = async () => {
+const login = async (isLogin) => {
     errorMessage.value = null;
 	if(username.value === '' || password.value === ''){
 	errorMessage.value = "Inserire username e password";
 	return;
 	}
     try{
-        const userData = await doLogin(username.value, password.value);
+        const userData = await doLogin(username.value, password.value,isLogin);
 
         sessionStorage.setItem('username', username.value);
 
@@ -28,12 +28,17 @@ const login = async () => {
     }
 };
 
+const signin = async () => {
+  logIn.value = false;
+};
+
 
 </script>
 
 <template>
   <div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
+
+    <div  class="card p-4 shadow-sm" style="max-width: 400px; width: 100%;">
       <h2 class="text-center mb-4">Login</h2>
       <div class="mb-3">
         <label for="username" class="form-label">Username</label>
@@ -43,7 +48,6 @@ const login = async () => {
           type="text"
           class="form-control"
           placeholder="Inserisci il tuo nome"
-          @keyup.enter="login"
         >
       </div>
 
@@ -57,22 +61,19 @@ const login = async () => {
          type="password"
          class="form-control"
          placeholder="Inserisci la tua password"
-         @keyup.enter="login"
          >
       </div>
 
-
-
       <ErrorMsg v-if="errorMessage" :msg="errorMessage" />
+      <div class="d-flex justify-content-center align-items-center gap-5">
+        <button v-if="!logIn"
+                class="btn btn-primary"
+                @click="login(false)">Sign In</button>
+        <button v-if="!logIn"
+                class="btn btn-primary"
+                @click="login(true)">Log In</button>
+      </div>
 
-      <button
-        type="button"
-        class="btn btn-primary w-100"
-        :disabled="!username || !password"
-        @click="login"
-      >
-        Entra
-      </button>
     </div>
   </div>
 </template>
