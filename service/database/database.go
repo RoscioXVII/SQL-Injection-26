@@ -33,6 +33,8 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"log"
 	"time"
 )
 
@@ -100,7 +102,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 	}
 
 	impl := &appdbimpl{c: db}
-
+	// fare check qui
 	if err := impl.initSchema(); err != nil {
 		return nil, err
 	}
@@ -110,4 +112,74 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 func (db *appdbimpl) Ping() error {
 	return db.c.Ping()
+}
+
+func (db *appdbimpl) initSchema() error {
+	// check se già riempito
+	var i int
+	err := db.c.QueryRow("SELECT COUNT(*) FROM User").Scan(&i)
+	if err != nil {
+		return err
+	}
+	if i == 0 { //quindi db vuoto
+		//riempio
+		log.Println("Inserimento dati")
+		query := `
+				INSERT INTO User (userId, password) VALUES
+					(1, '$2a$12$HASHEDPASSWORD1_ALICE_XYZ'),
+					(2, '$2a$12$HASHEDPASSWORD2_BOB_ABC'),
+					(3, 'forzaRoma2000!'),
+					(4, 'Mancini2x?#');
+				INSERT INTO UsPhoto(photoId, userId) VALUES
+				    (1,1),
+				    (1,2),
+				    (1,3),
+				    (2,4);
+				INSERT INTO UserUsername (userId, username) VALUES
+					(1, 'alice_dev'),
+					(2, 'bob_marley'),
+					(3, 'charlie_brown'),
+					(4, 'diana_prince');
+
+				INSERT INTO Group_ (name, creator) VALUES
+					('Team Sviluppo Go', 1);
+				INSERT INTO GroupPhoto (photoId, groupId) VALUES
+				    (2,1);
+
+				INSERT INTO Components (groupId, userId) VALUES
+					(1, 1),
+					(1, 2),
+					(1, 3);
+
+				INSERT INTO Conversation (component_A, component_B) VALUES
+					(1, 2),
+					(2, 4);
+
+				INSERT INTO Message (conversationId, groupId, text, photoId, sender, originalMessage, replyTo) VALUES
+					(1, NULL, 'Ciao Bob! Ci vediamo oggi pomeriggio?', NULL, 1, NULL, NULL),
+					(1, NULL, 'Sì Alice, alle 16:00 sono disponibile!', NULL, 2, NULL, NULL),
+					(1, NULL, 'Perfetto! a dopo.', NULL, 1, NULL, 2),
+					(NULL, 1, 'Benvenuti nel gruppo di sviluppo!', NULL, 1, NULL, NULL),
+					(NULL, 1, 'sono pronto a pushare.', NULL, 3, NULL, NULL),
+					(NULL, 1, NULL, NULL, 2, 1, NULL);
+
+				INSERT INTO ReadMessage (userId, messageId) VALUES
+					(2, 1),
+					(3, 4);
+
+				INSERT INTO Comment (emoji, userId, messageId) VALUES
+					('🚀', 3, 4),
+					('👍', 2, 4);
+
+				INSERT INTO Login (loginId, userId) VALUES
+					('6b29fc40-ca47-1067-b31d-00dd010662da', 1);
+`
+		// esecuzione query
+		_, err = db.c.Exec(query)
+
+		if err != nil {
+			return fmt.Errorf("Errore nell'inserimento dei dati nella banca dati: %v", err)
+		}
+	}
+	return nil
 }
