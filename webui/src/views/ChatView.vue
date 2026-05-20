@@ -169,8 +169,8 @@ export default {
 			const photo = photoInput.files[0];
 
 			// controllo estensione foto
-			if (photo && photo.type !== "image/png" && photo.type !== "image/jpeg") {
-				this.showError("Only PNG or JPEG!");
+			if (photo && photo.type !== "image/png" && photo.type !== "image/jpeg" && photo.type !== "image/svg+xml") {
+				this.showError("Only PNG or JPEG or SVG!");
 				photoInput.value = "";
 				return;
 			}
@@ -227,8 +227,8 @@ export default {
 			const file = event.target.files[0];
 			if (!file) return;
 
-			if (file.type !== "image/png" && file.type !== "image/jpeg") {
-				this.showError("Only PNG or JPEG!");
+			if (file.type !== "image/png" && file.type !== "image/jpeg" && file.type !== "image/svg+xml") {
+				this.showError("Only PNG or JPEG or SVG!");
 				event.target.value = "";
 				return;
 			}
@@ -344,7 +344,19 @@ export default {
               <button class="icon-btn" @click="showOptions(msg.messageId)"><img src="../icons/dots_16164512.png" width="15" height="15" alt="Options"></button>
             </div>
           </div>
-          <img v-if="msg.body.photo && msg.body.photo.url" :src="`${BASE_URL()}/file?file=${msg.body.photo.url}`" alt="PhotoMessage" class="message-photo">
+          <template v-if="msg.body.photo && msg.body.photo.url">
+            <object v-if="msg.body.photo.mime === 'image/svg+xml'"
+                    :data="`${BASE_URL()}/file?file=${msg.body.photo.url}`"
+                    type="image/svg+xml"
+                    class="message-photo">
+              <!-- Fallback se l'SVG non può essere visualizzato -->
+              <span>SVG non supportato</span>
+            </object>
+            <img v-else
+                 :src="`${BASE_URL()}/file?file=${msg.body.photo.url}`"
+                 alt="PhotoMessage"
+                 class="message-photo">
+          </template>
           <p class="text">{{ msg.body.text }}</p>
           <div class="justify-content-between">
             <span>{{ msg.time }}</span>

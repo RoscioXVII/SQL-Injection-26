@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
-	_ "image/jpeg"
-	_ "image/png"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -26,6 +24,7 @@ type Send struct {
 
 const JPEG = "image/jpeg"
 const PNG = "image/png"
+const SVG = "image/svg+xml" // Aggiunto supporto SVG
 
 func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params httprouter.Params, context reqcontext.RequestContext) {
 	userId, err := strconv.Atoi(params.ByName("userId"))
@@ -62,7 +61,6 @@ func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params ht
 	}
 	if !isThere {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-
 		return
 	}
 
@@ -97,17 +95,19 @@ func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params ht
 		file, header, err := r.FormFile("photo")
 
 		if err == nil {
-
 			mime := header.Header.Get("Content-Type")
 
-			if mime != JPEG && mime != PNG {
-				http.Error(w, "Invalid image type", http.StatusBadRequest)
+			// Ora accettiamo anche SVG
+			if mime != JPEG && mime != PNG && mime != SVG {
+				http.Error(w, "Invalid image type: only JPEG, PNG or SVG", http.StatusBadRequest)
 				return
 			}
 
 			ext := ".png"
 			if mime == JPEG {
 				ext = ".jpg"
+			} else if mime == SVG {
+				ext = ".svg"
 			}
 
 			defer func(file multipart.File) {
@@ -146,28 +146,36 @@ func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params ht
 				http.Error(w, "Write failed", http.StatusInternalServerError)
 				return
 			}
-			imgFile, err := os.Open(path)
-			if err != nil {
-				context.Logger.WithError(err).WithField("path", path).Error("Cannot open file")
-				http.Error(w, "Cannot save image", http.StatusInternalServerError)
-				return
+
+			// Per SVG non possiamo usare image.Decode, quindi saltiamo il controllo
+			// e inseriamo larghezza/altezza fittizie (es. 100x100)
+			var width, height int
+			if mime == SVG {
+				width = 100
+				height = 100
+			} else {
+				imgFile, err := os.Open(path)
+				if err != nil {
+					context.Logger.WithError(err).WithField("path", path).Error("Cannot open file")
+					http.Error(w, "Cannot save image", http.StatusInternalServerError)
+					return
+				}
+				img, _, err := image.Decode(imgFile)
+				imgFile.Close()
+				if err != nil {
+					context.Logger.WithError(err).Error("Error decoding photo file")
+					http.Error(w, "Cannot decode image", http.StatusInternalServerError)
+					return
+				}
+				width = img.Bounds().Dx()
+				height = img.Bounds().Dy()
 			}
 
-			img, _, err := image.Decode(imgFile)
-
-			if err != nil {
-				context.Logger.WithError(err).Error("Error decoding photo file")
-				http.Error(w, "Cannot decode image", http.StatusInternalServerError)
-				return
-			}
-			width := img.Bounds().Dx()
-			height := img.Bounds().Dy()
 			id, err := rt.db.InsertPhoto(path, width, height, mime)
 			if err != nil {
 				http.Error(w, "Cannot save photo to DB", http.StatusInternalServerError)
 				return
 			}
-
 			photoId = &id
 		}
 	}
@@ -178,9 +186,7 @@ func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params ht
 		return
 	}
 
-	// SALVA MESSAGGIO
 	mess, err := rt.db.InsertMessage(conversationId, userId, text, photoId, replyTo)
-
 	if err != nil {
 		http.Error(w, "Cannot save message", http.StatusInternalServerError)
 		return
@@ -194,7 +200,6 @@ func (rt *_router) postMessage(w http.ResponseWriter, r *http.Request, params ht
 		context.Logger.WithError(err).Error("Cannot save message")
 		return
 	}
-
 }
 
 func (rt *_router) postGroupMessage(w http.ResponseWriter, r *http.Request, params httprouter.Params, context reqcontext.RequestContext) {
@@ -267,17 +272,19 @@ func (rt *_router) postGroupMessage(w http.ResponseWriter, r *http.Request, para
 		file, header, err := r.FormFile("photo")
 
 		if err == nil {
-
 			mime := header.Header.Get("Content-Type")
 
-			if mime != JPEG && mime != PNG {
-				http.Error(w, "Invalid image type", http.StatusBadRequest)
+			// Accetta anche SVG
+			if mime != JPEG && mime != PNG && mime != SVG {
+				http.Error(w, "Invalid image type: only JPEG, PNG or SVG", http.StatusBadRequest)
 				return
 			}
 
 			ext := ".png"
 			if mime == JPEG {
 				ext = ".jpg"
+			} else if mime == SVG {
+				ext = ".svg"
 			}
 
 			defer func(file multipart.File) {
@@ -316,28 +323,35 @@ func (rt *_router) postGroupMessage(w http.ResponseWriter, r *http.Request, para
 				http.Error(w, "Write failed", http.StatusInternalServerError)
 				return
 			}
-			imgFile, err := os.Open(path)
-			if err != nil {
-				context.Logger.WithError(err).WithField("path", path).Error("Cannot open file")
-				http.Error(w, "Cannot save image", http.StatusInternalServerError)
-				return
+
+			// Per SVG non possiamo decodificare con image.Decode, usiamo valori fittizi
+			var width, height int
+			if mime == SVG {
+				width = 100
+				height = 100
+			} else {
+				imgFile, err := os.Open(path)
+				if err != nil {
+					context.Logger.WithError(err).WithField("path", path).Error("Cannot open file")
+					http.Error(w, "Cannot save image", http.StatusInternalServerError)
+					return
+				}
+				img, _, err := image.Decode(imgFile)
+				imgFile.Close()
+				if err != nil {
+					context.Logger.WithError(err).Error("Error decoding photo file")
+					http.Error(w, "Cannot decode image", http.StatusInternalServerError)
+					return
+				}
+				width = img.Bounds().Dx()
+				height = img.Bounds().Dy()
 			}
 
-			img, _, err := image.Decode(imgFile)
-
-			if err != nil {
-				context.Logger.WithError(err).Error("Error decoding photo file")
-				http.Error(w, "Cannot decode image", http.StatusInternalServerError)
-				return
-			}
-			width := img.Bounds().Dx()
-			height := img.Bounds().Dy()
 			id, err := rt.db.InsertPhoto(path, width, height, mime)
 			if err != nil {
 				http.Error(w, "Cannot save photo to DB", http.StatusInternalServerError)
 				return
 			}
-
 			photoId = &id
 		}
 	}
@@ -362,5 +376,4 @@ func (rt *_router) postGroupMessage(w http.ResponseWriter, r *http.Request, para
 		context.Logger.WithError(err).Error("Cannot save message")
 		return
 	}
-
 }
