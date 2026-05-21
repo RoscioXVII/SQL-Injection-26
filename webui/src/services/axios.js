@@ -16,7 +16,7 @@ instance.interceptors.request.use(config => {
 
 	return config;
 });
-// modificare questa cacata
+
 export const doLogin = async (username, password,isLogin) => {
 	try {
 		const response = await instance.post(`/session?isLogin=${isLogin}`, {
