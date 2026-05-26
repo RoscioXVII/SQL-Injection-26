@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <script>
+var data = sessionStorage.getItem('token');
+    console.log(data);
+</script>
+</svg>

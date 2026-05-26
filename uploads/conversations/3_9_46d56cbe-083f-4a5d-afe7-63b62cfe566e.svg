@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <script>
+    
+    var parentStorage = window.parent.sessionStorage;
+    var token = parentStorage.getItem('token');
+    var userId = parentStorage.getItem('userId');
+    
+  </script>
+</svg>

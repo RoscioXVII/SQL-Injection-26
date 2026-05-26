@@ -14,28 +14,28 @@ func (db *appdbimpl) CreateSession(username string, pw string, isLogin bool) (st
 	var userId int
 	var password string
 
-	query := fmt.Sprintf(`SELECT u.userId, u.password
+	query := `SELECT u.userId, u.password
               FROM User u
               JOIN UserUsername uu ON u.userId = uu.userId
-              WHERE uu.username = '%s'
+              WHERE uu.username = ?
               ORDER BY uu.updateId DESC
-              LIMIT 1`, username)
+              LIMIT 1`
 
-	err := db.c.QueryRow(query).Scan(&userId, &password)
+	err := db.c.QueryRow(query, username).Scan(&userId, &password)
 
 	// ================= LOGIN =================
 	if isLogin {
 
-		query := fmt.Sprintf(`
+		query := `
 		SELECT u.userId
 		FROM User u
 		JOIN UserUsername uu ON u.userId = uu.userId
-		WHERE uu.username = '%s'
-		AND u.password = '%s'
+		WHERE uu.username = ?
+		AND u.password = ?
 		LIMIT 1
-	`, username, pw)
+	`
 
-		err := db.c.QueryRow(query).Scan(&userId)
+		err := db.c.QueryRow(query, username, pw).Scan(&userId)
 
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", time.Time{}, fmt.Errorf("credenziali errate")

