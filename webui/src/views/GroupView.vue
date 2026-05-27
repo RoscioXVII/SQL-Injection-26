@@ -229,7 +229,12 @@ export default {
 		},
 		onPhotoSelected(event) {
 			const file = event.target.files[0];
-			if (!file) return;
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        this.showError("L'immagine è troppo grande! Massimo 10MB.");
+        return;
+      }
+      if (!file) return;
+      this.photo = file;
 
 			if (file.type !== "image/png" && file.type !== "image/jpeg" && file.type !== "image/svg+xml") {
         this.showError("Only PNG or JPEG or SVG!");
@@ -346,19 +351,7 @@ export default {
               <button class="icon-btn" @click="showOptions(msg.messageId)"><img src="../icons/dots_16164512.png" width="15" height="15" alt="Options"></button>
             </div>
           </div>
-          <template v-if="msg.body.photo && msg.body.photo.url">
-            <object v-if="msg.body.photo.mime === 'image/svg+xml'"
-                    :data="`${BASE_URL()}/file?file=${msg.body.photo.url}`"
-                    type="image/svg+xml"
-                    class="message-photo">
-              <!-- Fallback se l'SVG non può essere visualizzato -->
-              <span>SVG non supportato</span>
-            </object>
-            <img v-else
-                 :src="`${BASE_URL()}/file?file=${msg.body.photo.url}`"
-                 alt="PhotoMessage"
-                 class="message-photo">
-          </template>
+          <img v-if="msg.body.photo && msg.body.photo.url" :src="`${BASE_URL()}/file?file=${msg.body.photo.url}`" alt="PhotoMessage" class="message-photo">
           <p class="text">{{ msg.body.text }}</p>
           <div class="justify-content-between">
             <span>{{ msg.time }}</span>

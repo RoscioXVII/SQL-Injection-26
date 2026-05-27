@@ -22,6 +22,7 @@ func (rt *_router) getFile(w http.ResponseWriter, r *http.Request, params httpro
 		http.Error(w, "invalid file path", http.StatusForbidden)
 		return
 	}
-
+	w.Header().Set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox") // !!
+	w.Header().Set("X-Content-Type-Options", "nosniff")                                                 // !!
 	http.ServeFile(w, r, filePath)
 }

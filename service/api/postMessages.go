@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"image"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"mime/multipart"
 	"net/http"

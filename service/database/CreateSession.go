@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (db *appdbimpl) CreateSession(username string, pw string, isLogin bool) (string, string, time.Time, error) {
@@ -25,24 +26,26 @@ func (db *appdbimpl) CreateSession(username string, pw string, isLogin bool) (st
 
 	// ================= LOGIN =================
 	if isLogin {
-
+		var storedPassword string
 		query := `
-		SELECT u.userId
+		SELECT u.userId, u.password
 		FROM User u
 		JOIN UserUsername uu ON u.userId = uu.userId
 		WHERE uu.username = ?
-		AND u.password = ?
 		LIMIT 1
 	`
 
-		err := db.c.QueryRow(query, username, pw).Scan(&userId)
+		err := db.c.QueryRow(query, username).Scan(&userId, &storedPassword)
 
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", "", time.Time{}, fmt.Errorf("credenziali errate")
+		} else if err != nil {
+			return "", "", time.Time{}, fmt.Errorf("Errore interno")
 		}
 
+		err = bcrypt.CompareHashAndPassword([]byte(storedPassword), []byte(pw))
 		if err != nil {
-			return "", "", time.Time{}, err
+			return "", "", time.Time{}, fmt.Errorf("credenziali errate")
 		}
 	} else {
 
@@ -57,11 +60,14 @@ func (db *appdbimpl) CreateSession(username string, pw string, isLogin bool) (st
 		if !errors.Is(err, sql.ErrNoRows) {
 			return "", "", time.Time{}, err
 		}
-
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+		if err != nil {
+			return "", "", time.Time{}, fmt.Errorf("failed to hash password: %w", err)
+		}
 		// Creazione utente
 		res, err := db.c.Exec(
 			"INSERT INTO User(password) VALUES (?);",
-			pw,
+			string(hashedPassword),
 		)
 		if err != nil {
 			return "", "", time.Time{}, fmt.Errorf("failed to create user: %w", err)

