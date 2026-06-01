@@ -156,7 +156,7 @@ func (db *appdbimpl) initSchema() error {
 					(2, 4);
 
 				INSERT INTO Message (conversationId, groupId, text, photoId, sender, originalMessage, replyTo) VALUES
-					(1, NULL, 'Ciao Bob! Ci vediamo oggi pomeriggio?', NULL,, 1, NULL, NULL),
+					(1, NULL, 'Ciao Bob! Ci vediamo oggi pomeriggio?', NULL, 1, NULL, NULL),
 					(1, NULL, 'Sì Alice, alle 16:00 sono disponibile!', NULL, 2, NULL, NULL),
 					(1, NULL, 'Perfetto! a dopo.', NULL, 1, NULL, 2),
 					(NULL, 1, 'Benvenuti nel gruppo di sviluppo!', NULL, 1, NULL, NULL),
