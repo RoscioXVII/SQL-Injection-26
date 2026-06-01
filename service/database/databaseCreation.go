@@ -124,6 +124,93 @@ CREATE TABLE IF NOT EXISTS Comment(
 
 ---TRIGGER---
 
+--- TRIGGER CONTO PIGGYBACKED ---
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_GROUP_DELETE
+BEFORE DELETE ON Group_
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Group_.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_COMPONENTS_DELETE
+BEFORE DELETE ON Components
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Components.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_USER_DELETE
+BEFORE DELETE ON User
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella User.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_LOGIN_DELETE
+BEFORE DELETE ON Login
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Login.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_USERUSERNAME_DELETE
+BEFORE DELETE ON UserUsername
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella UserUsername.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_PHOTO_DELETE
+BEFORE DELETE ON Photo
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Photo.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_USPHOTO_DELETE
+BEFORE DELETE ON UsPhoto
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella UsPhoto.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_GROUPPHOTO_DELETE
+BEFORE DELETE ON GroupPhoto
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella GroupPhoto.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_CONVERSATION_DELETE
+BEFORE DELETE ON Conversation
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Conversation.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_MESSAGE_DELETE
+BEFORE DELETE ON Message
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella Message. Usa la logica di Soft Delete.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_READMESSAGE_DELETE
+BEFORE DELETE ON ReadMessage
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella ReadMessage.');
+END;
+
+
+CREATE TRIGGER IF NOT EXISTS PREVENT_DELETEDMESSAGE_DELETE
+BEFORE DELETE ON DeletedMessage
+BEGIN
+    SELECT RAISE(ABORT, 'Operazione di DELETE negata dal database sulla tabella DeletedMessage (Log di cancellazione immutabile).');
+END;
+
+
+
 CREATE TRIGGER IF NOT EXISTS CHECK_USERNAME
     BEFORE INSERT ON UserUsername
     FOR EACH ROW
