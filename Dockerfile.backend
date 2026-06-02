@@ -1,4 +1,4 @@
-FROM golang:1.23 AS builder
+FROM golang:1.25 AS builder
 # specifichiamo la versione di Go e lo impostiamo come builder
 
 WORKDIR /app
